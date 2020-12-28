@@ -1,2 +1,2 @@
 # Dec
-A modern graphics API wrapping vulkan lib
+A modern graphics API based on vulkan.
