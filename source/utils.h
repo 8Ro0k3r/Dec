@@ -18,6 +18,18 @@ struct QueueFamilyIndices {
 	}
 };
 
+union GPUMemoryPoolKey
+{
+	struct 
+	{
+		U32 AccessFlags : 8;
+		U32 MemoryType : 2;
+		U32 Unused : 22;
+	} m_AllFlags;
+
+	U32 m_Key;
+};
+
 QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surface);
 
 popEnd

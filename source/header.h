@@ -57,11 +57,29 @@ inline const classname Get##name() const { return m_##name; } \
 private: \
 classname m_##name;
 
+#define DEFINE_PRAVATE_CONST_MEMBER_REFERENCE(classname, name) \
+public: \
+inline const classname& Get##name() const { return m_##name; } \
+private: \
+const classname& m_##name;
+
+#define DEFINE_PRAVATE_MEMBER_BASE_TYPE(classname, name) \
+public: \
+inline const classname Get##name() const { return m_##name; } \
+private: \
+classname m_##name;
+
 #define DEFINE_PRAVATE_CONST_MEMBER_PTR(classname, name) \
 public: \
 inline const classname* Get##name() const { return m_##name; } \
 private: \
 const classname* m_##name;
+
+#define DEFINE_PRAVATE_MEMBER_PTR(classname, name) \
+public: \
+inline const classname* Get##name() const { return m_##name; } \
+private: \
+classname* m_##name;
 
 #define popBegin namespace Dec { 
 #define popEnd }; // namespace Dirty
