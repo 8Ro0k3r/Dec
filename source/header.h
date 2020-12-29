@@ -8,7 +8,8 @@
 #include <optional>
 
 #ifdef WIN32
-
+typedef ptrdiff_t   PTRDIFF;
+typedef uint64_t    U64;
 typedef uint32_t	U32;
 typedef int32_t		S32;
 typedef uint16_t	U16;
@@ -34,6 +35,7 @@ using Set = std::set<T>;
 typedef CHAR**(*funcVulkanExtensions)(U32&);
 
 #define popAlign(size, alignment) ((size + alignment - 1) & ~(alignment - 1))
+#define popArraySize(array) (sizeof(array)/sizeof(array[0]))
 
 #if defined(Debug)
 #define popAssert(expression)	assert(expression) 

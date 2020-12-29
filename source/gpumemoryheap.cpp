@@ -16,6 +16,9 @@ static U32 FindMemoryType(VkPhysicalDevice physicalDevice, U32 typeFilter, VkMem
 			return i;
 		}
 	}
+
+	popAssert(0);
+	return 0;
 }
 
 static U32 UsageToMemoryType(U32 usage)
@@ -47,11 +50,13 @@ static VkMemoryPropertyFlags AccessFlagToMemoryProperties(U32 accessFlag)
 	return 	(VkMemoryPropertyFlags)result;
 }
 
+// TODO : Alignment
 GPUMemoryHeap::GPUMemoryHeap(const Device& device, const GPUMemoryHeapCreation& creation)
 	: m_Device(device)
 	, m_Size(creation.Size)
 	, m_Alignment(creation.Alignment)
 	, m_HeapKey(creation.HeapKey)
+	, m_MapPtr(nullptr)
 {
 	GPUMemoryPoolKey heapKey;
 	heapKey.m_Key = m_HeapKey;

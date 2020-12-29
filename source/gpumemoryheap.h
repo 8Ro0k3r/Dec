@@ -1,5 +1,5 @@
-#ifndef _DEC_GPUMEMORYLAYOUT_
-#define _DEC_GPUMEMORYLAYOUT_
+#ifndef _DEC_GPUMEMORYHEAP_
+#define _DEC_GPUMEMORYHEAP_
 
 #include "header.h"
 
@@ -30,5 +30,5 @@ private:
 
 popEnd
 
-#endif // _DEC_GPUMEMORYLAYOUT_
+#endif // _DEC_GPUMEMORYHEAP_
 
