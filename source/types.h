@@ -38,7 +38,7 @@ namespace Dec
 		GPU_WRITE = GPU_READ << 1,
 		GPU_READWRITE = GPU_READ | GPU_WRITE,
 		GPU_EXCUTION = GPU_WRITE << 1
-	};
+	};	
 
 	enum BufferUsage
 	{
@@ -55,6 +55,50 @@ namespace Dec
 		UASGE_RAY_TRACEING,
 		USAGE_SHADER_DEVICE_ADDRESS,
 		USAGE_COUNT
+	};
+
+	enum TextureType
+	{
+		Texture1D,
+		Texture2D,
+		Texture3D
+	};
+	
+	enum ImageBindFlage
+	{
+		IMAGE_DEFAULT = 0,
+		IMAGE_INPUT,
+		IMAGE_STORAGE,
+		IMAGE_SAMPLED,
+		IMAGE_RENDERTARGET,
+		IMAGE_DEPTHSTENCIL,
+		IMAGE_DEPTHSTENCIL_READ_ONLY,
+		IMAGE_TRANSFER_SRC,
+		IMAGE_TRANSFER_DST,
+		//IMAGE_PREINITIALIZED,						// Todo : Not support yet
+		IMAGE_DEPTH_READ_ONLY_STENCIL,
+		IMAGE_Depth_stencil_Read_Only,
+		IMAGE_Swapchain,						// Swapchain?
+		//IMAGE_SHARED_PRESENT_KHR,					// Todo : Not support yet
+		//IMAGE_SHADING_RATE,						// Todo : Not support yet
+		//IMAGE_FRAGMENT_DENSITY_MAP_OPTIMAL_EXT,	// Todo : Not support yet
+		//IMAGE_DEPTH_READ_ONLY_STENCIL_KHR,		// Todo : Not support yet
+		//IMAGE_DEPTH_STENCIL_READ_ONLY_KHR,		// Todo : Not support yet
+	};	
+
+	enum SampleCount
+	{
+		Sample_1,
+		Sample_2,
+		Sample_4,
+		Sample_8,
+		Sample_16,
+	};
+
+	enum TilingMode
+	{
+		Linear,
+		Tiled
 	};
 
 	enum MemoryType
