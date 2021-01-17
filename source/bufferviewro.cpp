@@ -2,7 +2,8 @@
 
 popBegin
 
-BufferViewRO::BufferViewRO()
+BufferViewRO::BufferViewRO(const Device& device)
+	: Descriptor(device)
 {
 }
 

@@ -6,7 +6,7 @@
 
 popBegin
 
-class TextureViewDS	: public Descriptor
+class TextureViewDS	
 {
 public:
 	TextureViewDS();

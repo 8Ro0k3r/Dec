@@ -2,8 +2,10 @@
 
 popBegin
 
-TextureViewRW::TextureViewRW()
+TextureViewRW::TextureViewRW(const Device& device, const TextureResource& resource)
+	: Descriptor(device)
 {
+
 }
 
 

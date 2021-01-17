@@ -2,12 +2,16 @@
 
 popBegin
 
-GPUMemoryLayout::GPUMemoryLayout(const GPUMemoryHeap& pool, U32 size, U32 offset, U32 alignment)
+GPUMemoryLayout::GPUMemoryLayout(const GPUMemoryHeap& pool, const BufferCreation& creation)
 	: m_Pool(pool)
-	, m_Size(size)
-	, m_Offset(offset)
-	, m_Alignment(alignment)
 {
+
+}
+
+GPUMemoryLayout::GPUMemoryLayout(const GPUMemoryHeap& pool, const TextureCreation& creation)
+	: m_Pool(pool)
+{
+
 }
 
 

@@ -5,11 +5,11 @@
 #include "descriptor.h"
 
 popBegin
-
+class Device;
 class BufferViewRW : public Descriptor
 {
 public:
-	BufferViewRW();
+	BufferViewRW(const Device& device);
 	~BufferViewRW();
 };
 

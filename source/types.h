@@ -61,9 +61,11 @@ namespace Dec
 	{
 		Texture1D,
 		Texture2D,
-		Texture3D
+		Texture3D,
+		TextureCube,
+		Texture2DArray
 	};
-	
+
 	enum ImageBindFlage
 	{
 		IMAGE_DEFAULT = 0,

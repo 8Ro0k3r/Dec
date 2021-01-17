@@ -6,7 +6,7 @@
 
 popBegin
 
-class TextureTiewRT : public Descriptor
+class TextureTiewRT
 {
 public:
 	TextureTiewRT();

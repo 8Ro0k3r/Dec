@@ -90,9 +90,16 @@ VkImageType TextureTypeToVulkan(TextureType type)
 	return imageTypeLUT[(U32)type];
 }
 
+
 TextureResource::TextureResource(const Device& device, const GPUMemoryLayout& memoryLayout, 
 	const TextureCreation& textureCreation)
 	: m_Device(device)
+	, m_Format(textureCreation.Format)
+	, m_ImageType(textureCreation.Type)
+	, m_Width(textureCreation.Width)
+	, m_Height(textureCreation.Height)
+	, m_Level(textureCreation.Level)
+	, m_ArraySize(textureCreation.ArraySize)
 {
 	VkImageCreateInfo imageInfo = {};
 	imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;

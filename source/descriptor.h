@@ -4,12 +4,21 @@
 #include "header.h"
 
 popBegin
-
+class Device;
 class Descriptor
 {
+	DEFINE_PRAVATE_MEMBER_HANDLE(VkImageView, ImageView)
+	DEFINE_PRAVATE_MEMBER_HANDLE(VkBufferView, BufferView)
 public:
-	Descriptor();
+	Descriptor(const Device& device);
 	~Descriptor();
+
+protected:
+	void CreateImageView(const VkImageViewCreateInfo& creationInfo);
+	void CreateBufferView(const VkBufferViewCreateInfo& creationInfo);
+	VkImageViewType GetImageViewType(TextureType type);
+private:
+	const Device& m_Device;
 };
 
 popEnd

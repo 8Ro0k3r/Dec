@@ -5,11 +5,12 @@
 #include "descriptor.h"
 
 popBegin
-
+class Device;
+class TextureResource;
 class TextureViewRO	: public Descriptor
 {
 public:
-	TextureViewRO();
+	TextureViewRO(const Device& device, const TextureResource& resource);
 	~TextureViewRO();
 };
 
