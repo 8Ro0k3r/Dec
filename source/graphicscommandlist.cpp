@@ -3,11 +3,10 @@
 #include "Instance.h"
 popBegin
 
-GraphicsCommandList::GraphicsCommandList(const Device& device)
-	: ComputeCommandList(device, device.GetInstance().GetGraphicsFamilyIndex())
+GraphicsCommandList::GraphicsCommandList(const Device& device, const CommandAllocator& commandAllcator)
+	: ComputeCommandList(device, commandAllcator)
 {
 }
-
 
 GraphicsCommandList::~GraphicsCommandList()
 {

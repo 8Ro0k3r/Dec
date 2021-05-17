@@ -9,8 +9,7 @@ popBegin
 class CopyCommandlist : public CommandList
 {
 public:
-	CopyCommandlist(const Device& device);
-	CopyCommandlist(const Device& device, U32 familyIndex);
+	CopyCommandlist(const Device& device, const CommandAllocator& commandAllcator);
 	~CopyCommandlist();
 };
 

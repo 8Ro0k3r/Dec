@@ -2,7 +2,7 @@
 
 popBegin
 
-TextureTiewRT::TextureTiewRT()
+TextureTiewRT::TextureTiewRT(const Device& device, const TextureResource& textureResource, const TextureViewCreation& textureCreation)
 {
 }
 

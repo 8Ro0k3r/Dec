@@ -14,22 +14,32 @@ QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surfa
 
 	U32 i = 0;
 	for (const auto& queueFamily : queueFamilies) {
-		if (queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+		if (queueFamily.queueCount > 0 
+			&& queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) 
+		{
+			VkBool32 presentSupport = false;
+
+			popCallAPI(vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport));
+
+			if (queueFamily.queueCount > 0 && presentSupport) {
+				queueFamilyIndices.GraphicsFamily = i;
+			}
+
 			queueFamilyIndices.GraphicsFamily = i;
 		}
 
-		if (queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_COMPUTE_BIT) {
+		if (queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_COMPUTE_BIT)
+		{
 			queueFamilyIndices.ComputeFamily = i;
 		}
 
-		VkBool32 presentSupport = false;
-		vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
-		
-		if (queueFamily.queueCount > 0 && presentSupport) {
-			queueFamilyIndices.PresentFamily = i;
+		if (queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_TRANSFER_BIT)
+		{
+			queueFamilyIndices.CopyFamily = i;
 		}
 		
-		if (queueFamilyIndices.isComplete()) {
+		if (queueFamilyIndices.isComplete())
+		{
 			break;
 		}
 

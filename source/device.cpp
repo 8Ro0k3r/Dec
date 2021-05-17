@@ -11,11 +11,8 @@ Device::Device(const Instance& instance)
 
 	const Vector<VkDeviceQueueCreateInfo>& queueCreateInfos = instance.GetDeviceQueueCreateInfos();
 	const VkPhysicalDeviceFeatures& deviceFeatures = instance.GetPhysicalDeviceFeatures();
-	const Vector<const CHAR*>& deviceExtensions = m_Instance.GetExtensionNames();
-	const Vector<const CHAR*>& validationLayers = m_Instance.GetValidateLayerNames();
-
-	//TODO
-	BOOL enableValidationLayers = false;
+	const Vector<const CHAR*>& deviceExtensions = g_DeviceExtension;
+	const Vector<const CHAR*>& validationLayers = g_ValidationLayers;
 
 	createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
 	createInfo.pQueueCreateInfos = queueCreateInfos.data();
@@ -25,7 +22,7 @@ Device::Device(const Instance& instance)
 	createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
 	createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
-	if (enableValidationLayers) {
+	if (instance.IsEnableValidateLayer()) {
 		createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
 		createInfo.ppEnabledLayerNames = validationLayers.data();
 	}

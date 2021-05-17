@@ -109,6 +109,33 @@ namespace Dec
 		TYPE_PHYSICAL = TYPE_VIRTUAL << 1,
 		TYPE_COMMITTED = TYPE_VIRTUAL | TYPE_PHYSICAL
 	};
+
+	enum QueueType
+	{
+		QUEUE_TYPE_GRAPHICS = 0,
+		QUEUE_TYPE_COMPUTE = 1,
+		QUEUE_TYPE_COPY = 2
+	};
+
+	class GpuFence;
+	class CpuFence;
+	class CommandList;
+
+	struct SubmitInfo
+	{
+		U32 WaitFenceCount;
+		const GpuFence* WaitFencesPtr;
+		U32 SignalFenceCount;
+		const GpuFence* SignalFencesPtr;
+		U32 CommandBufferCount;
+		const CommandList*  CommandBuffersPtr;
+		const CpuFence& Fence;
+	};
+
+	struct TextureViewCreation
+	{
+
+	};
 };
 
 #endif // _DEC_TYPES_

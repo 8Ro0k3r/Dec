@@ -2,13 +2,24 @@
 
 popBegin
 
-Instance::Instance(funcVulkanExtensions& vulkanExtension, BOOL needValidateLayer)
-	: m_FuncVulkanExtension(vulkanExtension)
-	, m_PhysicalDevice(VK_NULL_HANDLE)
+static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData)
+{	
+	popLogError(pCallbackData->pMessage);
+	return VK_FALSE;
+}
+
+Instance::Instance(funcVulkanExtensions extensionFunc, funVulkanCreateSurface surfaceFunc, BOOL enableValidateLayer)
+	: m_FuncVulkanExtension(extensionFunc)
+	, m_FuncVulkanCreateSurface(surfaceFunc)
+	, m_Instance(VK_NULL_HANDLE)
 	, m_Surface(VK_NULL_HANDLE)
+	, m_PhysicalDevice(VK_NULL_HANDLE)
+	, m_EnableValidateLayer(enableValidateLayer)
 {
-	CreateInstance(needValidateLayer);
+	CreateInstance();
+	InitFunc();
 	CreatePhysicalDevice();
+	CreateSurface();
 	CreateQueueCreateInfo();
 }
 
@@ -16,38 +27,61 @@ Instance::~Instance()
 {
 	popAssert(m_Surface);
 	popAssert(m_PhysicalDevice);
+	if (m_EnableValidateLayer)
+	{
+		m_FuncDestroyDebugUtilsMessengerEXT(m_Instance, m_DebugMessenger, nullptr);
+	}
 	vkDestroySurfaceKHR(m_Instance, m_Surface, nullptr);
 	vkDestroyInstance(m_Instance, nullptr);
 }
 
-void Instance::CreateInstance(BOOL needValidateLayer)
+void Instance::InitFunc()
+{
+	m_FuncCreateDebugUtilsMessengerEXT = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(m_Instance, "vkCreateDebugUtilsMessengerEXT");
+	m_FuncDestroyDebugUtilsMessengerEXT	= (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(m_Instance, "vkDestroyDebugUtilsMessengerEXT");
+	popAssert(m_FuncCreateDebugUtilsMessengerEXT);
+	popAssert(m_FuncDestroyDebugUtilsMessengerEXT);
+	popCallAPI(m_FuncCreateDebugUtilsMessengerEXT(m_Instance, &m_DebugUtilsMessengerCreateInfoEXT, nullptr, &m_DebugMessenger));
+}
+
+void Instance::CreateSurface()
+{
+	popCallAPI(m_FuncVulkanCreateSurface(m_Instance, m_Surface));
+}
+
+void Instance::CreateInstance()
 {
 	VkApplicationInfo appInfo = {};
 	appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-	appInfo.pEngineName = "Dirty";
-	appInfo.pApplicationName = "Dirty";
+	appInfo.pEngineName = "Dec";
+	appInfo.pApplicationName = "Dec";
 	appInfo.apiVersion = VK_API_VERSION_1_0;
-	appInfo.applicationVersion = VK_API_VERSION_1_0;
-	appInfo.engineVersion = VK_API_VERSION_1_0;
+	appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+	appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
 
 	CheckRequiredExtension();
-
-	BOOL foundValidateLayer = false;
-	if (needValidateLayer)
-	{
-		foundValidateLayer = FoundRequiredLayer();
-	}
 
 	VkInstanceCreateInfo createInfo = {};
 	createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 	createInfo.enabledExtensionCount = (U32)m_RequireVulkanExtensionNames.size();
 	createInfo.ppEnabledExtensionNames = m_RequireVulkanExtensionNames.data();
-	createInfo.enabledLayerCount = foundValidateLayer ? (U32)validationLayers.size() : 0;
-	createInfo.ppEnabledLayerNames = foundValidateLayer ? validationLayers.data() : nullptr;
+	if (m_EnableValidateLayer && FoundRequiredLayer())
+	{
+		createInfo.enabledLayerCount = (U32)g_ValidationLayers.size();
+		createInfo.ppEnabledLayerNames = g_ValidationLayers.data();
+		
+		m_DebugUtilsMessengerCreateInfoEXT = {};
+		m_DebugUtilsMessengerCreateInfoEXT.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+		m_DebugUtilsMessengerCreateInfoEXT.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+		m_DebugUtilsMessengerCreateInfoEXT.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+		m_DebugUtilsMessengerCreateInfoEXT.pfnUserCallback = debugCallback;
+		createInfo.pNext = &m_DebugUtilsMessengerCreateInfoEXT;
+	}
+	
 	createInfo.pApplicationInfo = &appInfo;
 
 	//TODO: Need the user memory allocation callback.
-	vkCreateInstance(&createInfo, nullptr, &m_Instance);
+	popCallAPI(vkCreateInstance(&createInfo, nullptr, &m_Instance));
 }
 
 void Instance::CreatePhysicalDevice()
@@ -74,7 +108,7 @@ void Instance::CreateQueueCreateInfo()
 	{
 		m_QueueFamilyIndices.GraphicsFamily.value(),
 		m_QueueFamilyIndices.ComputeFamily.value(),
-		m_QueueFamilyIndices.PresentFamily.value()
+		m_QueueFamilyIndices.CopyFamily.value()
 	};
 
 	float queuePriority = 1.0f;
@@ -93,13 +127,10 @@ void Instance::CreateQueueCreateInfo()
 
 void Instance::CheckRequiredExtension()
 {
-	U32 extensionNameCount = 0;
-	CHAR** extensionNames = m_FuncVulkanExtension(extensionNameCount);
-
-	if (extensionNameCount > 0)
+	m_FuncVulkanExtension(m_RequireVulkanExtensionNames);
+	if (m_EnableValidateLayer) 
 	{
-		Vector<const CHAR*> vExtensionNames(extensionNames, extensionNames + extensionNameCount);
-		m_RequireVulkanExtensionNames = std::move(vExtensionNames);
+		m_RequireVulkanExtensionNames.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 	}
 }
 
@@ -110,7 +141,7 @@ BOOL Instance::FoundRequiredLayer()
 	Vector<VkLayerProperties> layerProperties(instaceLayerCount);
 	vkEnumerateInstanceLayerProperties(&instaceLayerCount, layerProperties.data());
 
-	for (auto& validateLayerName : validationLayers)
+	for (auto& validateLayerName : g_ValidationLayers)
 	{
 		for (auto& layerProperty : layerProperties)
 		{
@@ -122,42 +153,6 @@ BOOL Instance::FoundRequiredLayer()
 	}
 
 	return false;
-}
-
-S32 Instance::GetGraphicsFamilyIndex() const
-{
-	if (m_QueueFamilyIndices.GraphicsFamily.has_value())
-	{
-		return 	m_QueueFamilyIndices.GraphicsFamily.value();
-	}
-	else
-	{
-		return -1;
-	}
-}
-
-S32 Instance::GetComputeFamilyIndex() const
-{
-	if (m_QueueFamilyIndices.GraphicsFamily.has_value())
-	{
-		return 	m_QueueFamilyIndices.ComputeFamily.value();
-	}
-	else
-	{
-		return -1;
-	}
-}
-
-S32 Instance::GetPresentFamilyIndex() const
-{
-	if (m_QueueFamilyIndices.GraphicsFamily.has_value())
-	{
-		return 	m_QueueFamilyIndices.PresentFamily.value();
-	}
-	else
-	{
-		return -1;
-	}
 }
 
 popEnd

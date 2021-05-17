@@ -9,8 +9,7 @@ popBegin
 class ComputeCommandList : public CopyCommandlist
 {
 public:
-	ComputeCommandList(const Device& device);
-	ComputeCommandList(const Device& device, U32 familyIndex);
+	ComputeCommandList(const Device& device, const CommandAllocator& commandAllcator);
 	~ComputeCommandList();
 };
 

@@ -1,12 +1,16 @@
 #include "SwapChain.h"
 #include "device.h"
 #include "Instance.h"
+#include "gpufence.h"
+#include "queue.h"
+
 popBegin
 
 static const U32 defaultSwapchainBackResourceNum = 3;
 
 SwapChain::SwapChain(const Device& device)
 	: m_Device(device)
+	, m_Fence(nullptr)
 {
 	VkPhysicalDevice physicalDevice = device.GetInstance().GetPhysicalDevice();
 	VkSurfaceKHR surface = device.GetInstance().GetWindowSurface();
@@ -32,23 +36,7 @@ SwapChain::SwapChain(const Device& device)
 	createInfo.imageArrayLayers = 1;
 	createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-	QueueFamilyIndices indices = findQueueFamilies(physicalDevice, surface);
-	U32 queueFamilyIndices[] = 
-	{
-		indices.GraphicsFamily.value(),
-		indices.ComputeFamily.value(),
-		indices.PresentFamily.value() 
-	};
-
-	if (indices.GraphicsFamily != indices.PresentFamily) {
-		createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-		createInfo.queueFamilyIndexCount = 3;
-		createInfo.pQueueFamilyIndices = queueFamilyIndices;
-	}
-	else {
-		createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-	}
-
+	createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	createInfo.preTransform = m_Capabilities.currentTransform;
 	// TODO
 	createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
@@ -62,11 +50,14 @@ SwapChain::SwapChain(const Device& device)
 	vkGetSwapchainImagesKHR(m_Device.GetDevice(), m_SwapChain, &imageCount,
 		m_SwapChainImages.data());
 
+	m_Fence = popNew(GpuFence)(device);
+
 }
 
 SwapChain::~SwapChain()
 {
 	vkDestroySwapchainKHR(m_Device.GetDevice(), m_SwapChain, nullptr);
+	popDelete(m_Fence);
 }
 
 VkSurfaceFormatKHR SwapChain::ChooseSwapSurfaceFormat() 
@@ -122,6 +113,28 @@ VkPresentModeKHR SwapChain::ChooseSwapPresentMode() {
 	}
 
 	return bestMode;
+}
+
+void SwapChain::Acquire() const
+{
+	vkAcquireNextImageKHR(m_Device.GetDevice(), m_SwapChain, m_TimeoutMs, m_Fence->GetGpuFence(), VK_NULL_HANDLE, &m_CurrentIndex);
+}
+
+void SwapChain::Present(const Queue& queue) const
+{
+	VkPresentInfoKHR presentInfo = {};
+	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+
+	presentInfo.waitSemaphoreCount = 1;
+	presentInfo.pWaitSemaphores = &m_Fence->GetGpuFence();
+
+	VkSwapchainKHR swapChains[] = { m_SwapChain };
+	presentInfo.swapchainCount = 1;
+	presentInfo.pSwapchains = swapChains;
+
+	presentInfo.pImageIndices = &m_CurrentIndex;
+
+	vkQueuePresentKHR(queue.GetQueue(), &presentInfo);
 }
 
 VkExtent2D SwapChain::ChooseSwapExtent() {

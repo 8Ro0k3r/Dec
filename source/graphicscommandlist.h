@@ -9,7 +9,7 @@ popBegin
 class GraphicsCommandList : public ComputeCommandList
 {
 public:
-	GraphicsCommandList(const Device& device);
+	GraphicsCommandList(const Device& device, const CommandAllocator& commandAllcator);
 	~GraphicsCommandList();
 };
 

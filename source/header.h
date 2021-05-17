@@ -2,6 +2,7 @@
 
 #include "vulkan/vulkan.h"
 #include <ctype.h>
+#include <iostream>
 #include <assert.h>
 #include <set>
 #include <vector>
@@ -32,10 +33,14 @@ using Set = std::set<T>;
 
 #endif
 
-typedef CHAR**(*funcVulkanExtensions)(U32&);
+typedef void(*funcVulkanExtensions)(Vector<const CHAR*>&);
+typedef VkResult(*funVulkanCreateSurface)(VkInstance, VkSurfaceKHR&);
 
 #define popAlign(size, alignment) ((size + alignment - 1) & ~(alignment - 1))
 #define popArraySize(array) (sizeof(array)/sizeof(array[0]))
+#define popLogError(message) std::clog << message << std::endl
+#define popNew(object) new object
+#define popDelete(pObject) delete(pObject) 
 
 #if defined(Debug)
 #define popAssert(expression)	assert(expression) 
@@ -89,6 +94,7 @@ classname* m_##name;
 #define pop1080pHeight   1080
 #define pop1080pWidth	 1920
 
-const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
+const Vector<const char*> g_ValidationLayers = { "VK_LAYER_KHRONOS_validation" };
+const Vector<const char*> g_DeviceExtension = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
 #include "types.h"
